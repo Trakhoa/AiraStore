@@ -1,0 +1,692 @@
+﻿@model Project_Cellphoness.Models.SanPham
+@using Project_Cellphoness.Helpers
+
+@{
+    ViewBag.Title = Model.TenSP;
+    Layout = "~/Views/Shared/_Layout.cshtml";
+    Project_Cellphoness.Models.CellphonesStoreEntities1 db_detail = new Project_Cellphoness.Models.CellphonesStoreEntities1();
+}
+
+<style>
+    /* ================= BỐ CỤC TRANG CHI TIẾT ================= */
+    .product-detail-container {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 30px;
+        background: #fff;
+        padding: 25px;
+        border-radius: 12px;
+        box-shadow: 0 4px 15px rgba(0,0,0,0.05);
+        margin-top: 20px;
+    }
+
+    .product-image-col {
+        flex: 1;
+        min-width: 300px;
+        text-align: center;
+        border: 1px solid #eee;
+        border-radius: 12px;
+        padding: 20px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        background: linear-gradient(180deg, #fff 0%, #fdfdfd 100%);
+    }
+
+        /* HIỆU ỨNG 3D LƠ LỬNG CHO ẢNH SẢN PHẨM */
+        .product-image-col img {
+            max-width: 100%;
+            height: auto;
+            object-fit: contain;
+            max-height: 400px;
+            animation: floatUpDown 3s ease-in-out infinite;
+            filter: drop-shadow(0px 10px 15px rgba(0,0,0,0.1));
+        }
+
+    @@keyframes floatUpDown {
+        0% {
+            transform: translateY(0px);
+        }
+
+        50% {
+            transform: translateY(-15px);
+        }
+
+        100% {
+            transform: translateY(0px);
+        }
+    }
+
+    .product-info-col {
+        flex: 1.5;
+        min-width: 300px;
+    }
+
+    .product-title {
+        font-size: 24px;
+        font-weight: 800;
+        color: #222;
+        margin-top: 0;
+        margin-bottom: 10px;
+        border-bottom: 1px solid #eee;
+        padding-bottom: 12px;
+    }
+
+    .product-price-box {
+        background: linear-gradient(90deg, #fcebeb, #fff5f5);
+        padding: 15px 20px;
+        border-radius: 10px;
+        margin-bottom: 20px;
+        border-left: 4px solid #D70018;
+    }
+
+    .price-label {
+        font-size: 14px;
+        color: #666;
+    }
+
+    .price-value {
+        color: #D70018;
+        font-size: 28px;
+        font-weight: 900;
+        margin: 5px 0 0 0;
+    }
+
+    .stock-status {
+        display: inline-block;
+        padding: 6px 12px;
+        border-radius: 20px;
+        font-size: 13px;
+        font-weight: 700;
+        margin-bottom: 18px;
+    }
+
+    .in-stock {
+        background: #e8f5e9;
+        color: #2e7d32;
+    }
+
+    .out-stock {
+        background: #ffebee;
+        color: #c62828;
+    }
+
+    .specs-box {
+        border: 1px solid #e0e0e0;
+        border-radius: 10px;
+        overflow: hidden;
+        margin-bottom: 25px;
+    }
+
+    .specs-title {
+        background-color: #f8f9fa;
+        padding: 12px 15px;
+        font-weight: bold;
+        margin: 0;
+        border-bottom: 1px solid #e0e0e0;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        color: #D70018;
+    }
+
+    .specs-table {
+        width: 100%;
+        border-collapse: collapse;
+    }
+
+        .specs-table th, .specs-table td {
+            padding: 10px 15px;
+            border-bottom: 1px solid #f0f0f0;
+            font-size: 14px;
+        }
+
+        .specs-table th {
+            width: 35%;
+            background-color: #fafafa;
+            text-align: left;
+            color: #555;
+            font-weight: 600;
+        }
+
+    .action-buttons {
+        display: flex;
+        gap: 10px;
+        flex-wrap: wrap;
+    }
+
+    .btn-buy-now {
+        flex: 2;
+        min-width: 200px;
+        background: linear-gradient(135deg, #D70018, #ff3b2f);
+        color: white;
+        border: none;
+        padding: 15px;
+        border-radius: 10px;
+        font-size: 16px;
+        font-weight: bold;
+        cursor: pointer;
+        text-transform: uppercase;
+        transition: all 0.3s;
+        box-shadow: 0 4px 12px rgba(215, 0, 24, 0.25);
+    }
+
+        .btn-buy-now:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 18px rgba(215, 0, 24, 0.35);
+        }
+
+    .btn-action-icon {
+        flex: 1;
+        min-width: 120px;
+        background-color: white;
+        color: #D70018;
+        border: 2px solid #D70018;
+        padding: 10px;
+        border-radius: 10px;
+        font-size: 13px;
+        font-weight: bold;
+        cursor: pointer;
+        transition: all 0.3s;
+        text-decoration: none;
+        text-align: center;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        gap: 5px;
+    }
+
+        .btn-action-icon:hover {
+            background-color: #fcebeb;
+            transform: translateY(-2px);
+        }
+
+        .btn-action-icon.heart {
+            color: #D70018;
+            border-color: #ffcdd2;
+            background-color: #fff0f0;
+        }
+
+        .btn-action-icon.compare {
+            color: #333;
+            border-color: #ccc;
+            background-color: #f8f9fa;
+        }
+
+    /* ================= SẢN PHẨM GỢI Ý & PHỤ KIỆN ================= */
+    .related-product-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+        gap: 15px;
+        margin-top: 15px;
+    }
+
+    .related-card {
+        background: #fff;
+        border-radius: 12px;
+        padding: 15px;
+        text-align: center;
+        border: 1px solid #e0e0e0;
+        transition: all 0.3s ease;
+        display: flex;
+        flex-direction: column;
+    }
+
+        .related-card:hover {
+            box-shadow: 0 8px 20px rgba(0,0,0,0.08);
+            transform: translateY(-4px);
+            border-color: #ffcdd2;
+        }
+
+    .related-img {
+        width: 100%;
+        height: 180px;
+        object-fit: contain;
+        margin-bottom: 15px;
+        transition: transform 0.3s ease;
+    }
+
+    .related-card:hover .related-img {
+        transform: scale(1.05);
+    }
+
+    .related-name {
+        font-size: 14px;
+        font-weight: 700;
+        color: #333;
+        margin-bottom: 10px;
+        display: -webkit-box;
+        -webkit-line-clamp: 2;
+        -webkit-box-orient: vertical;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        min-height: 40px;
+    }
+
+    .related-price {
+        color: #D70018;
+        font-size: 16px;
+        font-weight: 800;
+        margin-top: auto;
+        margin-bottom: 15px;
+    }
+
+    /* ================= KHU VỰC ĐÁNH GIÁ & BÌNH LUẬN CÓ AVATAR ================= */
+    .review-section-card {
+        margin-top: 40px;
+        background: #fff;
+        padding: 30px;
+        border-radius: 14px;
+        box-shadow: 0 4px 15px rgba(0,0,0,0.05);
+        margin-bottom: 50px;
+    }
+
+    .review-compose-box {
+        display: flex;
+        gap: 18px;
+        background: #fdfdfd;
+        border: 1px solid #eee;
+        padding: 20px;
+        border-radius: 12px;
+        margin-bottom: 25px;
+    }
+
+    .review-user-avatar {
+        width: 52px;
+        height: 52px;
+        border-radius: 50%;
+        object-fit: cover;
+        border: 2px solid #D70018;
+        flex-shrink: 0;
+        background: #fce8eb;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-weight: 800;
+        font-size: 20px;
+        color: #D70018;
+        box-shadow: 0 3px 8px rgba(215, 0, 24, 0.15);
+    }
+
+    .star-rating-picker {
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+        margin-bottom: 12px;
+    }
+
+    .star-btn {
+        font-size: 24px;
+        color: #FFB800;
+        cursor: pointer;
+        transition: transform 0.2s ease, color 0.2s ease;
+    }
+
+        .star-btn:hover {
+            transform: scale(1.25) rotate(8deg);
+        }
+
+        .star-btn.inactive {
+            color: #dcdcdc;
+        }
+
+    .review-item-card {
+        display: flex;
+        gap: 16px;
+        padding: 20px 0;
+        border-bottom: 1px solid #f1f3f5;
+        transition: 0.2s;
+    }
+
+        .review-item-card:last-child {
+            border-bottom: none;
+        }
+
+    .review-bubble {
+        flex: 1;
+        background: #f8f9fa;
+        padding: 15px 18px;
+        border-radius: 12px;
+        border-top-left-radius: 2px;
+    }
+
+    .review-tier-tag {
+        display: inline-block;
+        background: linear-gradient(90deg, #ff9a44, #fc6076);
+        color: #fff;
+        font-size: 10px;
+        font-weight: 800;
+        padding: 2px 8px;
+        border-radius: 10px;
+        text-transform: uppercase;
+        margin-left: 6px;
+    }
+
+    .verified-buyer-tag {
+        color: #28a745;
+        font-size: 12px;
+        font-weight: 700;
+        margin-left: 8px;
+    }
+</style>
+
+<div style="margin-top:10px; margin-bottom:10px; color:#666; font-size:14px;">
+    <a href="/" style="color:#666; text-decoration:none;"><i class="fa-solid fa-house"></i> Trang chủ</a> >
+    <span>@Model.TenSP</span>
+</div>
+
+<div class="product-detail-container">
+    <div class="product-image-col">
+        <img src="@Model.HinhAnh" alt="@Model.TenSP" onerror="this.src='https://via.placeholder.com/400?text=No+Image'" />
+    </div>
+
+    <div class="product-info-col">
+        <h1 class="product-title">@Model.TenSP</h1>
+
+        @if (Model.SoLuongTon > 0)
+        {
+            <div class="stock-status in-stock"><i class="fa-solid fa-check"></i> Còn hàng (@Model.SoLuongTon máy)</div>
+        }
+        else
+        {
+            <div class="stock-status out-stock"><i class="fa-solid fa-xmark"></i> Tạm hết hàng</div>
+        }
+
+        <div class="product-price-box">
+            <div class="price-label">Giá ưu đãi:</div>
+            <p class="price-value">@String.Format("{0:0,0}", Model.GiaBan).Replace(",", ".") đ</p>
+        </div>
+
+        <div class="specs-box">
+            <h3 class="specs-title">
+                <lord-icon src="https://cdn.lordicon.com/wzwygmng.json" trigger="loop" delay="1500" colors="primary:#d70018" style="width:24px;height:24px"></lord-icon>
+                Thông số kỹ thuật
+            </h3>
+            <table class="specs-table">
+                @if (Model.ThongSoKyThuat != null)
+                {
+                    <tr><th>Màn hình</th><td>@(string.IsNullOrEmpty(Model.ThongSoKyThuat.ManHinh) ? "Đang cập nhật" : Model.ThongSoKyThuat.ManHinh)</td></tr>
+                    <tr><th>Chip xử lý</th><td>@(string.IsNullOrEmpty(Model.ThongSoKyThuat.Chip) ? "Đang cập nhật" : Model.ThongSoKyThuat.Chip)</td></tr>
+                    <tr><th>RAM</th><td>@(string.IsNullOrEmpty(Model.ThongSoKyThuat.RAM) ? "Đang cập nhật" : Model.ThongSoKyThuat.RAM)</td></tr>
+                    <tr><th>Bộ nhớ trong (ROM)</th><td>@(string.IsNullOrEmpty(Model.ThongSoKyThuat.ROM) ? "Đang cập nhật" : Model.ThongSoKyThuat.ROM)</td></tr>
+                    <tr><th>Camera</th><td>@(string.IsNullOrEmpty(Model.ThongSoKyThuat.Camera) ? "Đang cập nhật" : Model.ThongSoKyThuat.Camera)</td></tr>
+                    <tr><th>Pin</th><td>@(string.IsNullOrEmpty(Model.ThongSoKyThuat.Pin) ? "Đang cập nhật" : Model.ThongSoKyThuat.Pin)</td></tr>
+                }
+                else
+                {
+                    <tr><td colspan="2" style="text-align:center;">Dữ liệu cấu hình đang được cập nhật.</td></tr>
+                }
+            </table>
+        </div>
+
+        <div class="action-buttons">
+            @if (Model.SoLuongTon > 0)
+            {
+                <button class="btn-buy-now" onclick="window.location.href='@Url.Action("ThemGioHang", "GioHang", new { iMaSP = Model.MaSP, strURL = Url.Action("DatHang", "GioHang") })'">
+                    MUA NGAY <br><span style="font-size:12px; font-weight:normal;">Giao tận nơi hoặc nhận tại cửa hàng</span>
+                </button>
+
+                <a href="@Url.Action("ThemGioHang", "GioHang", new { iMaSP = Model.MaSP, strURL = Request.Url.ToString() })" class="btn-action-icon" onmouseenter="this.querySelector('lord-icon').play()">
+                    <lord-icon src="https://cdn.lordicon.com/cllunfud.json" trigger="hover" colors="primary:#d70018,secondary:#d70018" style="width:30px;height:30px"></lord-icon>
+                    THÊM VÀO GIỎ
+                </a>
+            }
+            else
+            {
+                <button class="btn-buy-now" style="background:#ccc; cursor:not-allowed;" disabled>
+                    TẠM HẾT HÀNG
+                </button>
+            }
+
+            <a href="@Url.Action("SoSanh", "Home", new { id1 = Model.MaSP })" class="btn-action-icon compare" onmouseenter="this.querySelector('lord-icon').play()">
+                <lord-icon src="https://cdn.lordicon.com/nocovwne.json" trigger="hover" colors="primary:#333333,secondary:#333333" style="width:30px;height:30px"></lord-icon>
+                SO SÁNH
+            </a>
+
+            <a href="@Url.Action("ThemYeuThich", "YeuThich", new { id = Model.MaSP, strURL = Request.Url.ToString() })" class="btn-action-icon heart" onmouseenter="this.querySelector('lord-icon').play()">
+                <lord-icon src="https://cdn.lordicon.com/rjzlnunf.json" trigger="hover" colors="primary:#d70018,secondary:#d70018" style="width:30px;height:30px"></lord-icon>
+                LƯU TIM
+            </a>
+        </div>
+    </div>
+</div>
+
+<!-- ================= SẢN PHẨM GỢI Ý ================= -->
+<div class="related-products-section" style="margin-top: 40px; border-top: 2px solid #f0f0f0; padding-top: 30px;">
+    <h3 style="font-size: 20px; font-weight: 800; color: #D70018; margin-bottom: 20px; text-transform: uppercase;">
+        <i class="fa-solid fa-tags" style="margin-right: 8px;"></i> Có thể bạn sẽ thích
+    </h3>
+
+    @if (ViewBag.ListGoiY != null && ((List<Project_Cellphoness.Models.SanPham>)ViewBag.ListGoiY).Any())
+    {
+        <div class="related-product-grid">
+            @foreach (var item in (List<Project_Cellphoness.Models.SanPham>)ViewBag.ListGoiY)
+            {
+                <div class="related-card">
+                    <a href="/Home/Details/@item.MaSP" style="text-decoration:none; color:inherit;">
+                        <img src="@item.HinhAnh" class="related-img" alt="@item.TenSP" onerror="this.src='https://via.placeholder.com/200?text=No+Image'" />
+                        <h4 class="related-name">@item.TenSP</h4>
+                    </a>
+                    <p class="related-price">@String.Format("{0:0,0}", item.GiaBan).Replace(",", ".") đ</p>
+                    <a href="@Url.Action("ThemGioHang", "GioHang", new { iMaSP = item.MaSP, strURL = Request.Url.ToString() })"
+                       style="background-color: #D70018; color: white; padding: 10px; border-radius: 6px; text-decoration: none; font-weight: 600; display: block; width: 100%; box-sizing: border-box; transition: 0.3s;">
+                        <i class="fa-solid fa-cart-plus"></i> Xem nhanh / Mua
+                    </a>
+                </div>
+            }
+        </div>
+    }
+    else
+    {
+        <p style="color: #888; font-style: italic;">Hiện tại chưa có sản phẩm gợi ý phù hợp.</p>
+    }
+</div>
+
+<!-- ================= PHỤ KIỆN MUA KÈM ================= -->
+<div class="related-products-section" style="margin-top: 40px; border-top: 2px solid #f0f0f0; padding-top: 30px;">
+    <h3 style="font-size: 20px; font-weight: 800; color: #D70018; margin-bottom: 20px; text-transform: uppercase;">
+        <i class="fa-solid fa-headphones" style="margin-right: 8px;"></i> Phụ kiện mua kèm
+    </h3>
+
+    @{
+        var dsPhuKien = db_detail.SanPham
+                                 .Where(sp => sp.MaHang == 5 && sp.TrangThai == 1 && sp.SoLuongTon > 0)
+                                 .Take(4)
+                                 .ToList();
+    }
+
+    @if (dsPhuKien != null && dsPhuKien.Count > 0)
+    {
+        <div class="related-product-grid">
+            @foreach (var pk in dsPhuKien)
+            {
+                <div class="related-card">
+                    <a href="/Home/Details/@pk.MaSP" style="text-decoration:none; color:inherit;">
+                        <img src="@pk.HinhAnh" class="related-img" alt="@pk.TenSP" onerror="this.src='https://via.placeholder.com/200?text=No+Image'" />
+                        <h4 class="related-name">@pk.TenSP</h4>
+                    </a>
+                    <p class="related-price">@String.Format("{0:0,0}", pk.GiaBan).Replace(",", ".") đ</p>
+
+                    <a href="@Url.Action("ThemGioHang", "GioHang", new { iMaSP = pk.MaSP, strURL = Request.Url.ToString() })"
+                       style="background-color: #D70018; color: white; padding: 10px; border-radius: 6px; text-decoration: none; font-weight: 600; display: block; width: 100%; box-sizing: border-box; transition: 0.3s; margin-top: auto;">
+                        <i class="fa-solid fa-cart-plus"></i> Thêm vào giỏ
+                    </a>
+                </div>
+            }
+        </div>
+    }
+    else
+    {
+        <p style="color: #888; font-style: italic;">Hiện chưa có phụ kiện đi kèm cho sản phẩm này.</p>
+    }
+</div>
+
+<!-- ================= ĐÁNH GIÁ SẢN PHẨM (ĐÃ ĐỒNG BỘ AVATAR KHÁCH HÀNG) ================= -->
+<div class="review-section-card">
+    <h3 style="margin-top: 0; color: #333; border-bottom: 2px solid var(--red-cps); padding-bottom: 12px; margin-bottom: 22px; font-size: 20px;">
+        <i class="fa-solid fa-comments" style="color: #D70018;"></i> ĐÁNH GIÁ SẢN PHẨM
+    </h3>
+
+    @if (TempData["ThongBaoBinhLuan"] != null)
+    {
+        <div style="background-color: #d4edda; color: #155724; padding: 15px; border-radius: 8px; margin-bottom: 20px; font-weight: bold; border: 1px solid #c3e6cb;">
+            <i class="fa-solid fa-check-circle"></i> @TempData["ThongBaoBinhLuan"]
+        </div>
+    }
+    @if (TempData["LoiBinhLuan"] != null)
+    {
+        <div style="background-color: #f8d7da; color: #721c24; padding: 15px; border-radius: 8px; margin-bottom: 20px; font-weight: bold; border: 1px solid #f5c6cb;">
+            <i class="fa-solid fa-triangle-exclamation"></i> @TempData["LoiBinhLuan"]
+        </div>
+    }
+
+    @if (Session["TaiKhoan"] != null)
+    {
+        var sessUser = Session["TaiKhoan"] as Project_Cellphoness.Models.TaiKhoan;
+        var currentUser = db_detail.TaiKhoan.Find(sessUser.MaTK) ?? sessUser;
+        string currentHang = DiemThuongHelper.LayHangThanhVien(currentUser.DiemTichLuy);
+
+        using (Html.BeginForm("GuiBinhLuan", "Home", FormMethod.Post))
+        {
+            <input type="hidden" name="MaSP" value="@Model.MaSP" />
+            <input type="hidden" name="SoSao" id="hdnSoSao" value="5" />
+
+            <div class="review-compose-box">
+                <!-- HIỂN THỊ AVATAR CỦA KHÁCH ĐANG ĐĂNG NHẬP -->
+                @if (!string.IsNullOrEmpty(currentUser.Avatar))
+                {
+                    <img src="@Url.Content(currentUser.Avatar)" class="review-user-avatar" alt="@currentUser.HoTen" />
+                }
+                else
+                {
+                    <div class="review-user-avatar">
+                        @(string.IsNullOrEmpty(currentUser.HoTen) ? "U" : currentUser.HoTen.Substring(0, 1).ToUpper())
+                    </div>
+                }
+
+                <div style="flex: 1;">
+                    <div style="margin-bottom: 8px; font-weight: 800; color: #222; font-size: 15px;">
+                        @currentUser.HoTen
+                        <span class="review-tier-tag"><i class="fa-solid fa-medal"></i> @currentHang</span>
+                    </div>
+
+                    <div style="display: flex; align-items: center; gap: 12px; margin-bottom: 10px; flex-wrap: wrap;">
+                        <span style="font-weight: 600; color: #555; font-size: 14px;">Mức độ hài lòng:</span>
+                        <div class="star-rating-picker" id="starPicker">
+                            <i class="fa-solid fa-star star-btn" data-val="1" onclick="chonSaoDanhGia(1)"></i>
+                            <i class="fa-solid fa-star star-btn" data-val="2" onclick="chonSaoDanhGia(2)"></i>
+                            <i class="fa-solid fa-star star-btn" data-val="3" onclick="chonSaoDanhGia(3)"></i>
+                            <i class="fa-solid fa-star star-btn" data-val="4" onclick="chonSaoDanhGia(4)"></i>
+                            <i class="fa-solid fa-star star-btn" data-val="5" onclick="chonSaoDanhGia(5)"></i>
+                        </div>
+                        <span id="starLabelText" style="font-size: 13.5px; font-weight: 700; color: #D70018;">(5 Sao - Tuyệt vời)</span>
+                    </div>
+
+                    <textarea name="NoiDung" required rows="3" style="width: 100%; padding: 12px 15px; border-radius: 8px; border: 1px solid #ddd; box-sizing: border-box; font-family: inherit; font-size: 14.5px; outline: none; margin-bottom: 12px; transition: 0.2s;" placeholder="Mời bạn chia sẻ cảm nhận thực tế về sản phẩm này..."></textarea>
+
+                    <button type="submit" style="background: linear-gradient(135deg, #D70018, #ff4b2b); color: white; border: none; padding: 10px 24px; border-radius: 8px; font-weight: bold; font-size: 14.5px; cursor: pointer; transition: 0.25s; box-shadow: 0 4px 10px rgba(215, 0, 24, 0.25);">
+                        <i class="fa-solid fa-paper-plane"></i> GỬI ĐÁNH GIÁ
+                    </button>
+                </div>
+            </div>
+        }
+    }
+    else
+    {
+        <div style="background: #f8f9fa; padding: 20px; text-align: center; border-radius: 10px; border: 1px dashed #ccc; margin-bottom: 25px;">
+            <i class="fa-solid fa-lock" style="font-size: 30px; color: #999; margin-bottom: 10px;"></i>
+            <p style="color: #555; font-size: 15px; margin-bottom: 15px;">Bạn cần đăng nhập tài khoản để có thể để lại bình luận và đánh giá sản phẩm này.</p>
+            <a href="/TaiKhoan/DangNhap" style="background: var(--red-cps); color: white; padding: 10px 22px; border-radius: 6px; text-decoration: none; font-weight: bold; display: inline-block;">Đăng Nhập Ngay</a>
+        </div>
+    }
+
+    <!-- DANH SÁCH BÌNH LUẬN ĐÃ DUYỆT -->
+    <div style="margin-top: 20px;">
+        @{
+            var tatCaDanhGia = ViewBag.ListDanhGia as IEnumerable<Project_Cellphoness.Models.DanhGia>;
+            var dsDaDuyet = tatCaDanhGia != null ? tatCaDanhGia.Where(d => d.PheDuyet == true).ToList() : new List<Project_Cellphoness.Models.DanhGia>();
+        }
+
+        @if (dsDaDuyet.Count > 0)
+        {
+            foreach (var dg in dsDaDuyet)
+            {
+                var tkBinhLuan = db_detail.TaiKhoan.FirstOrDefault(u => u.MaTK == dg.MaTK) ?? dg.TaiKhoan;
+                string tenNguoiBL = tkBinhLuan != null && !string.IsNullOrEmpty(tkBinhLuan.HoTen) ? tkBinhLuan.HoTen : "Khách hàng";
+                string avatarBL = tkBinhLuan != null && !string.IsNullOrEmpty(tkBinhLuan.Avatar) ? Url.Content(tkBinhLuan.Avatar) : "";
+                string hangBL = tkBinhLuan != null ? DiemThuongHelper.LayHangThanhVien(tkBinhLuan.DiemTichLuy) : "Thành viên";
+
+                <div class="review-item-card">
+                    <!-- HIỂN THỊ AVATAR NGƯỜI BÌNH LUẬN -->
+                    @if (!string.IsNullOrEmpty(avatarBL))
+                    {
+                        <img src="@avatarBL" class="review-user-avatar" alt="@tenNguoiBL" />
+                    }
+                    else
+                    {
+                        <div class="review-user-avatar">
+                            @tenNguoiBL.Substring(0, 1).ToUpper()
+                        </div>
+                    }
+
+                    <div class="review-bubble">
+                        <div style="display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; margin-bottom: 6px;">
+                            <div>
+                                <strong style="color: #222; font-size: 15px;">@tenNguoiBL</strong>
+                                <span class="review-tier-tag"><i class="fa-solid fa-medal"></i> @hangBL</span>
+                                <span class="verified-buyer-tag"><i class="fa-solid fa-circle-check"></i> Đã mua tại AiraStore</span>
+                            </div>
+                            <span style="font-size: 12.5px; color: #888;">
+                                <i class="fa-regular fa-clock"></i> @(dg.NgayDG != null ? dg.NgayDG.Value.ToString("dd/MM/yyyy HH:mm") : "")
+                            </span>
+                        </div>
+
+                        <div style="font-size: 14px; color: #FFB800; margin-bottom: 8px;">
+                            @for (int i = 0; i < dg.SoSao; i++)
+                            {<i class="fa-solid fa-star"></i>}
+                            @for (int i = dg.SoSao; i < 5; i++)
+                            {<i class="fa-regular fa-star" style="color: #ccc;"></i>}
+                        </div>
+
+                        <div style="color: #333; line-height: 1.6; font-size: 14.5px;">
+                            @dg.NoiDung
+                        </div>
+                    </div>
+                </div>
+            }
+        }
+        else
+        {
+            <div style="text-align: center; color: #999; padding: 30px 0;">
+                <img src="https://cdn-icons-png.flaticon.com/512/7486/7486744.png" style="width: 60px; opacity: 0.2; margin-bottom: 10px;" />
+                <p>Chưa có đánh giá nào cho sản phẩm này. Hãy là người đầu tiên trải nghiệm và nhận xét nhé!</p>
+            </div>
+        }
+    </div>
+</div>
+
+<script>
+    const starTextMap = {
+        1: "(1 Sao - Rất tệ)",
+        2: "(2 Sao - Trung bình)",
+        3: "(3 Sao - Khá ổn)",
+        4: "(4 Sao - Tốt)",
+        5: "(5 Sao - Tuyệt vời)"
+    };
+
+    function chonSaoDanhGia(soSao) {
+        document.getElementById('hdnSoSao').value = soSao;
+        document.getElementById('starLabelText').innerText = starTextMap[soSao];
+
+        const stars = document.querySelectorAll('#starPicker .star-btn');
+        stars.forEach(s => {
+            const val = parseInt(s.getAttribute('data-val'));
+            if (val <= soSao) {
+                s.classList.remove('inactive');
+            } else {
+                s.classList.add('inactive');
+            }
+        });
+    }
+</script>
