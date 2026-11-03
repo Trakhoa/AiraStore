@@ -1,0 +1,82 @@
+﻿@model IEnumerable<Project_Cellphoness.Models.TaiKhoan>
+@using Project_Cellphoness.Helpers
+
+@{
+    ViewBag.Title = "Quản lý Khách hàng";
+    Layout = "~/Areas/Admin/Views/Shared/_Layout.cshtml";
+}
+
+<div style="max-width: 1200px; margin: 20px auto; background: #fff; padding: 20px; border-radius: 10px; box-shadow: 0 4px 10px rgba(0,0,0,0.05);">
+
+    <div style="border-bottom: 2px solid var(--red-cps); padding-bottom: 10px; margin-bottom: 20px;">
+        <h2 style="color: #333; margin: 0;"><i class="fa-solid fa-users"></i> QUẢN LÝ TÀI KHOẢN KHÁCH HÀNG</h2>
+    </div>
+
+    <table style="width: 100%; border-collapse: collapse;">
+        <thead>
+            <tr style="background-color: #343a40; color: white; text-align: left;">
+                <th style="padding: 12px; font-weight: bold; width: 60px;">Mã TK</th>
+                <th style="padding: 12px; font-weight: bold;">Họ Tên</th>
+                <th style="padding: 12px; font-weight: bold;">Điện Thoại</th>
+                <th style="padding: 12px; font-weight: bold;">Email / Tài khoản</th>
+                <!-- THÊM CỘT HẠNG THÀNH VIÊN VÀO ADMIN -->
+                <th style="padding: 12px; font-weight: bold; text-align: center;">Hạng / Điểm VIP</th>
+                <th style="padding: 12px; font-weight: bold; text-align: center;">Trạng Thái</th>
+                <th style="padding: 12px; font-weight: bold; text-align: center; width: 150px;">Thao Tác</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var item in Model)
+            {
+                <tr style="border-bottom: 1px solid #e9ecef; transition: 0.2s;">
+                    <td style="padding: 12px; font-weight: bold;">#@item.MaTK</td>
+                    <td style="padding: 12px; font-weight: bold; color: var(--red-cps);">@item.HoTen</td>
+                    <td style="padding: 12px;">@item.SoDienThoai</td>
+                    <td style="padding: 12px;">@item.Email</td>
+
+                    <!-- XỬ LÝ VÀ HIỂN THỊ HẠNG / ĐIỂM -->
+                    <td style="padding: 12px; text-align: center;">
+                        @{
+                            string hang = DiemThuongHelper.LayHangThanhVien(item.DiemTichLuy);
+                        }
+                        <div style="font-weight: 800; color: #D70018; margin-bottom: 4px;">
+                            <i class="fa-solid fa-crown" style="color: #f1c40f;"></i> @hang
+                        </div>
+                        <div style="font-size: 12px; color: #666;">
+                            Tích lũy: <b style="color: #333;">@(item.DiemTichLuy ?? 0)</b>
+                        </div>
+                        <div style="font-size: 12px; color: #28a745;">
+                            Khả dụng: <b>@(item.DiemHienTai ?? 0)</b>
+                        </div>
+                    </td>
+
+                    <td style="padding: 12px; text-align: center;">
+                        @if (item.TrangThai == true)
+                        {
+                            <span style="background: #28a745; color: white; padding: 5px 10px; border-radius: 20px; font-size: 12px; font-weight: bold;"><i class="fa-solid fa-check"></i> Hoạt động</span>
+                        }
+                        else
+                        {
+                            <span style="background: #dc3545; color: white; padding: 5px 10px; border-radius: 20px; font-size: 12px; font-weight: bold;"><i class="fa-solid fa-lock"></i> Bị Khóa</span>
+                        }
+                    </td>
+
+                    <td style="padding: 12px; text-align: center;">
+                        @if (item.TrangThai == true)
+                        {
+                            <a href="@Url.Action("ThayDoiTrangThai", "QuanLyTaiKhoan", new { id = item.MaTK })" style="background: #dc3545; color: white; padding: 8px 15px; border-radius: 4px; text-decoration: none; font-size: 13px; font-weight: bold; display: inline-block;">
+                                <i class="fa-solid fa-ban"></i> Khóa
+                            </a>
+                        }
+                        else
+                        {
+                            <a href="@Url.Action("ThayDoiTrangThai", "QuanLyTaiKhoan", new { id = item.MaTK })" style="background: #17a2b8; color: white; padding: 8px 15px; border-radius: 4px; text-decoration: none; font-size: 13px; font-weight: bold; display: inline-block;">
+                                <i class="fa-solid fa-unlock-keyhole"></i> Mở Khóa
+                            </a>
+                        }
+                    </td>
+                </tr>
+            }
+        </tbody>
+    </table>
+</div>
